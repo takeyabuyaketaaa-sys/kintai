@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="勤怠管理">
+  <meta name="theme-color" content="#1E40AF">
+  <title>勤怠管理</title>
+  <style>
+    /* ============================================
+       リセット & 基本設定
+       ============================================ */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #1E40AF;
+      --primary-light: #3B82F6;
+      --primary-bg: #EFF6FF;
+      --success: #16A34A;
+      --success-bg: #F0FDF4;
+      --danger: #DC2626;
+      --danger-bg: #FEF2F2;
+      --text: #1F2937;
+      --text-secondary: #6B7280;
+      --bg: #F8FAFC;
+      --white: #FFFFFF;
+      --border: #E5E7EB;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-lg: 0 4px 12px rgba(0,0,0,0.1);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-text-size-adjust: 100%;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      padding-top: var(--safe-top);
+      padding-bottom: var(--safe-bottom);
+    }
+
+    /* ============================================
+       タブバー
+       ============================================ */
+    .tab-bar {
+      display: flex;
+      border-top: 1px solid var(--border);
+      background: var(--white);
+      flex-shrink: 0;
+      padding-bottom: env(safe-area-inset-bottom, 8px);
+    }
+
+    .tab-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 0 6px;
+      border: none;
+      background: none;
+      color: var(--text-secondary);
+      font-size: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: color 0.2s;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .tab-item.active {
+      color: var(--primary);
+    }
+
+    .tab-item svg {
+      width: 26px;
+      height: 26px;
+      margin-bottom: 3px;
+    }
+
+    /* ============================================
+       メインコンテンツ
+       ============================================ */
+    .screen {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    .screen-inner {
+      padding: 20px 16px 32px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* ============================================
+       ヘッダー
+       ============================================ */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .settings-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 14px;
+      border: none;
+      background: var(--primary-bg);
+      color: var(--primary);
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .settings-btn:active {
+      opacity: 0.7;
+    }
+
+    .settings-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ============================================
+       時計表示
+       ============================================ */
+    .clock-section {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .clock-time {
+      font-size: 52px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--primary);
+      font-variant-numeric: tabular-nums;
+      line-height: 1.2;
+    }
+
+    .clock-date {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 4px;
+    }
+
+    /* ============================================
+       カード
+       ============================================ */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .card-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    /* ============================================
+       フォーム要素
+       ============================================ */
+    select, input[type="time"], input[type="text"], input[type="url"] {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 16px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--white);
+      color: var(--text);
+      appearance: none;
+      -webkit-appearance: none;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    select:focus, input:focus {
+      outline: none;
+      border-color: var(--primary-light);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .select-wrapper {
+      position: relative;
+    }
+
+    .select-wrapper::after {
+      content: "";
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 6px solid var(--text-secondary);
+      pointer-events: none;
+    }
+
+    .time-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .time-row .time-field {
+      flex: 1;
+    }
+
+    .time-row .time-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .time-separator {
+      font-size: 20px;
+      color: var(--text-secondary);
+      padding-top: 20px;
+    }
+
+    input[type="time"] {
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ============================================
+       打刻ボタン
+       ============================================ */
+    .stamp-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 8px;
+    }
+
+    .stamp-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 20px;
+      border: none;
+      border-radius: var(--radius);
+      font-family: inherit;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+      -webkit-user-select: none;
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stamp-btn:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+
+    .stamp-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .stamp-btn-clockin {
+      background: linear-gradient(135deg, #1E40AF 0%, #3B82F6 100%);
+      color: white;
+      box-shadow: 0 4px 14px rgba(30, 64, 175, 0.35);
+    }
+
+    .stamp-btn-clockout {
+      background: linear-gradient(135deg, #DC2626 0%, #EF4444 100%);
+      color: white;
+      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+    }
+
+    .stamp-btn-icon {
+      font-size: 32px;
+      margin-bottom: 6px;
+    }
+
+    .stamp-btn-text {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: 8px;
+      padding-left: 8px;
+    }
+
+    .stamp-btn-sub {
+      font-size: 12px;
+      opacity: 0.8;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    /* ============================================
+       フィードバック
+       ============================================ */
+    .feedback {
+      padding: 14px 18px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      margin-top: 16px;
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .feedback.show {
+      display: block;
+    }
+
+    .feedback.success {
+      background: var(--success-bg);
+      color: var(--success);
+      border: 1px solid #BBF7D0;
+    }
+
+    .feedback.error {
+      background: var(--danger-bg);
+      color: var(--danger);
+      border: 1px solid #FECACA;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================
+       ローディング
+       ============================================ */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.3);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .loading-overlay.show {
+      display: flex;
+    }
+
+    .loading-box {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 32px 40px;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    /* ============================================
+       確認ダイアログ
+       ============================================ */
+    .dialog-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 24px;
+    }
+
+    .dialog-overlay.show {
+      display: flex;
+    }
+
+    .dialog {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 28px 24px 20px;
+      width: 100%;
+      max-width: 340px;
+      box-shadow: var(--shadow-lg);
+      text-align: center;
+    }
+
+    .dialog-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .dialog-message {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .dialog-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .dialog-btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .dialog-btn:active {
+      opacity: 0.7;
+    }
+
+    .dialog-btn-cancel {
+      background: var(--bg);
+      color: var(--text-secondary);
+    }
+
+    .dialog-btn-confirm {
+      background: var(--primary);
+      color: white;
+    }
+
+    .dialog-btn-confirm.danger {
+      background: var(--danger);
+    }
+
+    /* ============================================
+       履歴画面
+       ============================================ */
+    .history-date {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      background: var(--white);
+      border-radius: var(--radius-sm);
+      margin-bottom: 10px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+
+    .history-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      font-size: 20px;
+      flex-shrink: 0;
+      margin-right: 14px;
+    }
+
+    .history-badge.clockin {
+      background: var(--primary-bg);
+    }
+
+    .history-badge.clockout {
+      background: var(--danger-bg);
+    }
+
+    .history-info {
+      flex: 1;
+    }
+
+    .history-type {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .history-type.clockin { color: var(--primary); }
+    .history-type.clockout { color: var(--danger); }
+
+    .history-detail {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 3px;
+    }
+
+    .history-time {
+      font-size: 18px;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      color: var(--text);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .empty-state-text {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    /* ============================================
+       設定画面
+       ============================================ */
+    .settings-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 900;
+      display: none;
+      flex-direction: column;
+      padding-top: var(--safe-top);
+    }
+
+    .settings-screen.show {
+      display: flex;
+    }
+
+    .settings-header {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--white);
+    }
+
+    .settings-back {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      border: none;
+      background: none;
+      color: var(--primary);
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      padding: 4px 0;
+    }
+
+    .settings-back svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .settings-title {
+      flex: 1;
+      text-align: center;
+      font-size: 17px;
+      font-weight: 700;
+      margin-right: 60px;
+    }
+
+    .settings-body {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 20px 16px 40px;
+      max-width: 480px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .settings-section {
+      margin-bottom: 24px;
+    }
+
+    .settings-section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      padding-left: 4px;
+    }
+
+    .settings-input-group {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 16px;
+      border: 1px solid var(--border);
+    }
+
+    .settings-input-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .settings-hint {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      line-height: 1.5;
+      padding-left: 4px;
+    }
+
+    .settings-save-btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--primary);
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      margin-top: 8px;
+    }
+
+    .settings-save-btn:active {
+      opacity: 0.8;
+    }
+
+    /* ============================================
+       インストールバナー
+       ============================================ */
+    .install-banner {
+      margin: 0 16px 12px;
+      padding: 14px 16px;
+      background: var(--primary-bg);
+      border: 1px solid rgba(30, 64, 175, 0.15);
+      border-radius: var(--radius-sm);
+      display: none;
+    }
+
+    .install-banner.show {
+      display: block;
+    }
+
+    .install-banner-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 4px;
+    }
+
+    .install-banner-text {
+      font-size: 12px;
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .install-banner-close {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 6px 14px;
+      border: none;
+      background: rgba(30, 64, 175, 0.1);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      float: right;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================
+       ローディングオーバーレイ
+       ============================================ -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <div class="loading-text">送信中...</div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       確認ダイアログ
+       ============================================ -->
+  <div class="dialog-overlay" id="dialogOverlay">
+    <div class="dialog">
+      <div class="dialog-title" id="dialogTitle"></div>
+      <div class="dialog-message" id="dialogMessage"></div>
+      <div class="dialog-buttons">
+        <button class="dialog-btn dialog-btn-cancel" id="dialogCancel">キャンセル</button>
+        <button class="dialog-btn dialog-btn-confirm" id="dialogConfirm">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       設定画面
+       ============================================ -->
+  <div class="settings-screen" id="settingsScreen">
+    <div class="settings-header">
+      <button class="settings-back" id="settingsBack">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        戻る
+      </button>
+      <div class="settings-title">設定</div>
+    </div>
+    <div class="settings-body">
+      <div class="settings-section">
+        <div class="settings-section-title">GAS連携設定</div>
+        <div class="settings-input-group">
+          <label for="gasUrlInput">Google Apps Script WebアプリURL</label>
+          <input type="url" id="gasUrlInput" placeholder="https://script.google.com/macros/s/...">
+        </div>
+        <div class="settings-hint">
+          GoogleスプレッドシートのApps Scriptでデプロイした際に発行されるURLを入力してください。未設定の場合、打刻データはこの端末のみに保存されます。
+        </div>
+      </div>
+      <button class="settings-save-btn" id="settingsSave">保存する</button>
+    </div>
+  </div>
+
+  <!-- ============================================
+       打刻画面
+       ============================================ -->
+  <div class="screen active" id="screenStamp">
+    <div class="screen-inner">
+
+      <!-- インストールバナー -->
+      <div class="install-banner" id="installBanner">
+        <div class="install-banner-title">📱 ホーム画面に追加できます</div>
+        <div class="install-banner-text" id="installBannerText"></div>
+        <button class="install-banner-close" id="installBannerClose">閉じる</button>
+        <div style="clear:both"></div>
+      </div>
+
+      <!-- ヘッダー -->
+      <div class="header">
+        <h1>勤怠管理</h1>
+        <button class="settings-btn" id="openSettings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          設定
+        </button>
+      </div>
+
+      <!-- 時計 -->
+      <div class="clock-section">
+        <div class="clock-time" id="clockTime">--:--:--</div>
+        <div class="clock-date" id="clockDate"></div>
+      </div>
+
+      <!-- スタッフ名 -->
+      <div class="card">
+        <div class="card-label">スタッフ名</div>
+        <div class="select-wrapper">
+          <select id="staffSelect">
+            <option value="田中 太郎">田中 太郎</option>
+            <option value="佐藤 花子">佐藤 花子</option>
+            <option value="鈴木 一郎">鈴木 一郎</option>
+            <option value="高橋 美咲">高橋 美咲</option>
+            <option value="山田 健太">山田 健太</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 予定勤務時間 -->
+      <div class="card">
+        <div class="card-label">予定勤務時間</div>
+        <div class="time-row">
+          <div class="time-field">
+            <div class="time-label">出勤</div>
+            <input type="time" id="scheduledStart" value="09:00">
+          </div>
+          <div class="time-separator">〜</div>
+          <div class="time-field">
+            <div class="time-label">退勤</div>
+            <input type="time" id="scheduledEnd" value="18:00">
+          </div>
+        </div>
+      </div>
+
+      <!-- 打刻ボタン -->
+      <div class="stamp-buttons">
+        <button class="stamp-btn stamp-btn-clockin" id="btnClockIn">
+          <div class="stamp-btn-icon">🏢</div>
+          <div class="stamp-btn-text">出　勤</div>
+          <div class="stamp-btn-sub">Clock In</div>
+        </button>
+        <button class="stamp-btn stamp-btn-clockout" id="btnClockOut">
+          <div class="stamp-btn-icon">🏠</div>
+          <div class="stamp-btn-text">退　勤</div>
+          <div class="stamp-btn-sub">Clock Out</div>
+        </button>
+      </div>
+
+      <!-- フィードバック -->
+      <div class="feedback" id="feedback"></div>
+
+    </div>
+  </div>
+
+  <!-- ============================================
+       履歴画面
+       ============================================ -->
+  <div class="screen" id="screenHistory">
+    <div class="screen-inner">
+      <div class="header">
+        <h1>打刻履歴</h1>
+      </div>
+      <div class="history-date" id="historyDate"></div>
+      <div id="historyList"></div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       タブバー
+       ============================================ -->
+  <div class="tab-bar">
+    <button class="tab-item active" data-tab="stamp">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      打刻
+    </button>
+    <button class="tab-item" data-tab="history">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/><path d="M1 12a11 11 0 0 1 11-11"/></svg>
+      履歴
+    </button>
+  </div>
+
+  <!-- ============================================
+       JavaScript
+       ============================================ -->
+  <script>
+    /* ============================================
+       定数・設定
+       ============================================ */
+    // ★★★ ここにGAS WebアプリのURLを設定してください ★★★
+    // 設定画面からも変更できます
+    const DEFAULT_GAS_URL = "";
+
+    const STORAGE_KEYS = {
+      STAFF_NAME: "kintai_staff_name",
+      SCHEDULED_START: "kintai_scheduled_start",
+      SCHEDULED_END: "kintai_scheduled_end",
+      LAST_CLOCK_IN: "kintai_last_clock_in",
+      LAST_CLOCK_OUT: "kintai_last_clock_out",
+      TODAY_RECORDS: "kintai_today_records",
+      GAS_URL: "kintai_gas_url",
+      INSTALL_DISMISSED: "kintai_install_dismissed",
+    };
+
+    /* ============================================
+       DOM要素
+       ============================================ */
+    const $ = (id) => document.getElementById(id);
+    const clockTime = $("clockTime");
+    const clockDate = $("clockDate");
+    const staffSelect = $("staffSelect");
+    const scheduledStart = $("scheduledStart");
+    const scheduledEnd = $("scheduledEnd");
+    const btnClockIn = $("btnClockIn");
+    const btnClockOut = $("btnClockOut");
+    const feedback = $("feedback");
+    const loadingOverlay = $("loadingOverlay");
+    const dialogOverlay = $("dialogOverlay");
+    const dialogTitle = $("dialogTitle");
+    const dialogMessage = $("dialogMessage");
+    const dialogConfirm = $("dialogConfirm");
+    const dialogCancel = $("dialogCancel");
+    const settingsScreen = $("settingsScreen");
+    const gasUrlInput = $("gasUrlInput");
+    const historyList = $("historyList");
+    const historyDate = $("historyDate");
+    const installBanner = $("installBanner");
+    const installBannerText = $("installBannerText");
+
+    /* ============================================
+       状態管理
+       ============================================ */
+    let isSending = false;
+    let dialogResolve = null;
+
+    /* ============================================
+       ユーティリティ
+       ============================================ */
+    function getTodayString() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    }
+
+    function formatDateJP(date) {
+      const days = ["日", "月", "火", "水", "木", "金", "土"];
+      return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日(${days[date.getDay()]})`;
+    }
+
+    function formatTime(isoString) {
+      const d = new Date(isoString);
+      return `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}:${String(d.getSeconds()).padStart(2, "0")}`;
+    }
+
+    function getGasUrl() {
+      return localStorage.getItem(STORAGE_KEYS.GAS_URL) || DEFAULT_GAS_URL;
+    }
+
+    /* ============================================
+       時計の更新
+       ============================================ */
+    function updateClock() {
+      const now = new Date();
+      clockTime.textContent = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+      clockDate.textContent = formatDateJP(now);
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    /* ============================================
+       ローカルストレージ操作
+       ============================================ */
+    function loadSettings() {
+      const savedStaff = localStorage.getItem(STORAGE_KEYS.STAFF_NAME);
+      if (savedStaff) staffSelect.value = savedStaff;
+
+      const savedStart = localStorage.getItem(STORAGE_KEYS.SCHEDULED_START);
+      if (savedStart) scheduledStart.value = savedStart;
+
+      const savedEnd = localStorage.getItem(STORAGE_KEYS.SCHEDULED_END);
+      if (savedEnd) scheduledEnd.value = savedEnd;
+
+      const savedUrl = localStorage.getItem(STORAGE_KEYS.GAS_URL);
+      if (savedUrl) gasUrlInput.value = savedUrl;
+    }
+
+    function saveSelection() {
+      localStorage.setItem(STORAGE_KEYS.STAFF_NAME, staffSelect.value);
+      localStorage.setItem(STORAGE_KEYS.SCHEDULED_START, scheduledStart.value);
+      localStorage.setItem(STORAGE_KEYS.SCHEDULED_END, scheduledEnd.value);
+    }
+
+    function getTodayRecords() {
+      try {
+        const data = JSON.parse(localStorage.getItem(STORAGE_KEYS.TODAY_RECORDS) || "[]");
+        const today = getTodayString();
+        return data.filter((r) => r.timestamp && r.timestamp.startsWith(today));
+      } catch {
+        return [];
+      }
+    }
+
+    function saveTodayRecords(records) {
+      localStorage.setItem(STORAGE_KEYS.TODAY_RECORDS, JSON.stringify(records));
+    }
+
+    /* ============================================
+       確認ダイアログ
+       ============================================ */
+    function showDialog(title, message, isDanger) {
+      dialogTitle.textContent = title;
+      dialogMessage.textContent = message;
+      dialogConfirm.className = `dialog-btn dialog-btn-confirm${isDanger ? " danger" : ""}`;
+      dialogOverlay.classList.add("show");
+
+      return new Promise((resolve) => {
+        dialogResolve = resolve;
+      });
+    }
+
+    dialogConfirm.addEventListener("click", () => {
+      dialogOverlay.classList.remove("show");
+      if (dialogResolve) dialogResolve(true);
+    });
+
+    dialogCancel.addEventListener("click", () => {
+      dialogOverlay.classList.remove("show");
+      if (dialogResolve) dialogResolve(false);
+    });
+
+    /* ============================================
+       フィードバック表示
+       ============================================ */
+    function showFeedback(message, type) {
+      feedback.textContent = message;
+      feedback.className = `feedback show ${type}`;
+      setTimeout(() => {
+        feedback.classList.remove("show");
+      }, 5000);
+    }
+
+    /* ============================================
+       打刻処理
+       ============================================ */
+    async function handleStamp(type) {
+      if (isSending) return;
+
+      // 入力値の保存
+      saveSelection();
+
+      const staffName = staffSelect.value;
+      if (!staffName) {
+        showFeedback("スタッフ名を選択してください", "error");
+        return;
+      }
+
+      // 二重打刻チェック
+      const today = getTodayString();
+      const lastKey = type === "出勤" ? STORAGE_KEYS.LAST_CLOCK_IN : STORAGE_KEYS.LAST_CLOCK_OUT;
+      const lastDate = localStorage.getItem(lastKey);
+
+      if (lastDate === today) {
+        const confirmed = await showDialog(
+          "二重打刻の確認",
+          `本日すでに「${type}」の打刻があります。\nもう一度打刻しますか？`,
+          true
+        );
+        if (!confirmed) return;
+      }
+
+      // 通常の確認ダイアログ
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+      const confirmed = await showDialog(
+        `${type}の確認`,
+        `${staffName}さんの${type}を打刻します。\n\n打刻時刻: ${timeStr}\n予定: ${scheduledStart.value} 〜 ${scheduledEnd.value}`,
+        false
+      );
+      if (!confirmed) return;
+
+      // 送信開始
+      isSending = true;
+      btnClockIn.disabled = true;
+      btnClockOut.disabled = true;
+      loadingOverlay.classList.add("show");
+
+      const timestamp = new Date().toISOString();
+      const payload = {
+        staffName: staffName,
+        type: type,
+        timestamp: timestamp,
+        scheduledStart: scheduledStart.value,
+        scheduledEnd: scheduledEnd.value,
+      };
+
+      try {
+        const gasUrl = getGasUrl();
+
+        if (gasUrl) {
+          // GASへ送信
+          const response = await fetch(gasUrl, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain" },
+            body: JSON.stringify(payload),
+            redirect: "follow",
+          });
+
+          if (!response.ok) {
+            throw new Error(`通信エラー (${response.status})`);
+          }
+        }
+
+        // ローカルに記録
+        const record = { ...payload };
+        const records = getTodayRecords();
+        records.push(record);
+        saveTodayRecords(records);
+
+        // 最終打刻日を更新
+        localStorage.setItem(lastKey, today);
+
+        const msg = gasUrl
+          ? `✅ ${type}を打刻しました`
+          : `✅ ${type}を記録しました（GAS未設定のためローカル保存のみ）`;
+        showFeedback(msg, "success");
+
+      } catch (error) {
+        showFeedback(`❌ 打刻に失敗しました: ${error.message}`, "error");
+      } finally {
+        isSending = false;
+        btnClockIn.disabled = false;
+        btnClockOut.disabled = false;
+        loadingOverlay.classList.remove("show");
+      }
+    }
+
+    btnClockIn.addEventListener("click", () => handleStamp("出勤"));
+    btnClockOut.addEventListener("click", () => handleStamp("退勤"));
+
+    // 入力変更時に保存
+    staffSelect.addEventListener("change", saveSelection);
+    scheduledStart.addEventListener("change", saveSelection);
+    scheduledEnd.addEventListener("change", saveSelection);
+
+    /* ============================================
+       履歴表示
+       ============================================ */
+    function renderHistory() {
+      const records = getTodayRecords();
+      historyDate.textContent = `📅 ${formatDateJP(new Date())}`;
+
+      if (records.length === 0) {
+        historyList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <div class="empty-state-text">本日の打刻記録はありません</div>
+          </div>
+        `;
+        return;
+      }
+
+      // 新しい順に表示
+      const sorted = [...records].reverse();
+      historyList.innerHTML = sorted.map((r) => {
+        const isClockIn = r.type === "出勤";
+        return `
+          <div class="history-item">
+            <div class="history-badge ${isClockIn ? "clockin" : "clockout"}">
+              ${isClockIn ? "🏢" : "🏠"}
+            </div>
+            <div class="history-info">
+              <div class="history-type ${isClockIn ? "clockin" : "clockout"}">${r.type}</div>
+              <div class="history-detail">${r.staffName}｜予定 ${r.scheduledStart} 〜 ${r.scheduledEnd}</div>
+            </div>
+            <div class="history-time">${formatTime(r.timestamp)}</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    /* ============================================
+       タブ切り替え
+       ============================================ */
+    document.querySelectorAll(".tab-item").forEach((tab) => {
+      tab.addEventListener("click", () => {
+        document.querySelectorAll(".tab-item").forEach((t) => t.classList.remove("active"));
+        tab.classList.add("active");
+
+        const target = tab.dataset.tab;
+        document.querySelectorAll(".screen").forEach((s) => s.classList.remove("active"));
+
+        if (target === "stamp") {
+          $("screenStamp").classList.add("active");
+        } else {
+          $("screenHistory").classList.add("active");
+          renderHistory();
+        }
+      });
+    });
+
+    /* ============================================
+       設定画面
+       ============================================ */
+    $("openSettings").addEventListener("click", () => {
+      gasUrlInput.value = getGasUrl();
+      settingsScreen.classList.add("show");
+    });
+
+    $("settingsBack").addEventListener("click", () => {
+      settingsScreen.classList.remove("show");
+    });
+
+    $("settingsSave").addEventListener("click", () => {
+      const url = gasUrlInput.value.trim();
+      localStorage.setItem(STORAGE_KEYS.GAS_URL, url);
+      settingsScreen.classList.remove("show");
+      showFeedback("✅ 設定を保存しました", "success");
+    });
+
+    /* ============================================
+       インストールバナー
+       ============================================ */
+    function checkInstallBanner() {
+      // PWAとして起動済みなら非表示
+      if (window.matchMedia("(display-mode: standalone)").matches) return;
+      if (window.navigator.standalone === true) return;
+
+      // 以前閉じた場合は非表示
+      if (localStorage.getItem(STORAGE_KEYS.INSTALL_DISMISSED) === "true") return;
+
+      const ua = navigator.userAgent.toLowerCase();
+      const isIOS = /iphone|ipad|ipod/.test(ua);
+
+      installBannerText.textContent = isIOS
+        ? 'ブラウザの共有ボタン（□↑）をタップし、「ホーム画面に追加」を選択すると、アプリのように使えます。'
+        : 'ブラウザのメニュー（⋮）から「ホーム画面に追加」を選択すると、アプリのように使えます。';
+
+      installBanner.classList.add("show");
+    }
+
+    $("installBannerClose").addEventListener("click", () => {
+      installBanner.classList.remove("show");
+      localStorage.setItem(STORAGE_KEYS.INSTALL_DISMISSED, "true");
+    });
+
+    /* ============================================
+       初期化
+       ============================================ */
+    loadSettings();
+    checkInstallBanner();
+  </script>
+</body>
+</html>
