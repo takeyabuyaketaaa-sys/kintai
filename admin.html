@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>勤怠管理 - 管理ツール</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+    background: #F5F5F5;
+    color: #212121;
+    min-height: 100vh;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* ヘッダー */
+  .header {
+    background: linear-gradient(135deg, #1565C0, #1976D2);
+    color: white;
+    padding: 20px 16px;
+    padding-top: max(env(safe-area-inset-top, 20px), 20px);
+    text-align: center;
+  }
+  .header h1 { font-size: 20px; font-weight: 700; }
+  .header p { font-size: 13px; opacity: 0.85; margin-top: 4px; }
+
+  /* コンテナ */
+  .container {
+    padding: 20px 16px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  /* セクション */
+  .section {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #424242;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title .icon {
+    font-size: 20px;
+  }
+
+  /* URL設定 */
+  .url-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .url-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #E0E0E0;
+    border-radius: 12px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+  .url-input:focus {
+    border-color: #1976D2;
+  }
+  .url-status {
+    font-size: 12px;
+    color: #757575;
+    padding: 0 4px;
+  }
+  .url-status.saved { color: #2E7D32; }
+
+  /* ボタン共通 */
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s;
+    -webkit-tap-highlight-color: transparent;
+    font-family: inherit;
+  }
+  .btn:active {
+    transform: scale(0.97);
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .btn .btn-icon {
+    font-size: 22px;
+  }
+
+  /* チェック更新ボタン */
+  .btn-refresh {
+    background: linear-gradient(135deg, #1565C0, #1976D2);
+    color: white;
+    margin-bottom: 12px;
+  }
+
+  /* シフト表作成ボタン */
+  .btn-shift {
+    background: linear-gradient(135deg, #2E7D32, #43A047);
+    color: white;
+  }
+
+  /* URL保存ボタン */
+  .btn-save {
+    background: #1976D2;
+    color: white;
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  /* 年月入力 */
+  .month-input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .month-input-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #616161;
+    white-space: nowrap;
+  }
+  .month-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px solid #E0E0E0;
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+    font-family: inherit;
+    text-align: center;
+  }
+  .month-input:focus {
+    border-color: #2E7D32;
+  }
+
+  /* 結果メッセージ */
+  .result-message {
+    display: none;
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 14px;
+    text-align: center;
+    animation: fadeIn 0.3s ease;
+  }
+  .result-message.success {
+    display: block;
+    background: #E8F5E9;
+    color: #2E7D32;
+    border: 1px solid #C8E6C9;
+  }
+  .result-message.error {
+    display: block;
+    background: #FFEBEE;
+    color: #C62828;
+    border: 1px solid #FFCDD2;
+  }
+  .result-message.loading {
+    display: block;
+    background: #E3F2FD;
+    color: #1565C0;
+    border: 1px solid #BBDEFB;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* 注意書き */
+  .note {
+    font-size: 12px;
+    color: #9E9E9E;
+    text-align: center;
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+
+  /* スピナー */
+  .spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2.5px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+  }
+  .spinner.dark {
+    border-color: rgba(0,0,0,0.15);
+    border-top-color: #1565C0;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* フッター */
+  .footer {
+    text-align: center;
+    padding: 20px 16px;
+    padding-bottom: max(env(safe-area-inset-bottom, 20px), 20px);
+  }
+  .footer a {
+    color: #1976D2;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🛠 勤怠管理 管理ツール</h1>
+  <p>チェックシート更新・シフト表作成</p>
+</div>
+
+<div class="container">
+
+  <!-- GAS URL設定 -->
+  <div class="section">
+    <div class="section-title">
+      <span class="icon">⚙</span>
+      GAS WebアプリURL
+    </div>
+    <div class="url-input-group">
+      <input type="url" id="gasUrl" class="url-input" placeholder="https://script.google.com/macros/s/..." />
+      <div id="urlStatus" class="url-status">URLを入力して保存してください</div>
+      <button class="btn btn-save" onclick="saveUrl()">URLを保存する</button>
+    </div>
+  </div>
+
+  <!-- チェックシート更新 -->
+  <div class="section">
+    <div class="section-title">
+      <span class="icon">🔄</span>
+      チェックシート更新
+    </div>
+    <button class="btn btn-refresh" id="btnRefresh" onclick="refreshCheck()">
+      <span class="btn-icon">🔄</span>
+      今月のチェックを更新する
+    </button>
+    <div id="refreshResult" class="result-message"></div>
+    <p class="note">打刻データとシフト表を照合し、<br>チェックシートを最新状態に更新します</p>
+  </div>
+
+  <!-- シフト表作成 -->
+  <div class="section">
+    <div class="section-title">
+      <span class="icon">📋</span>
+      シフト表作成
+    </div>
+    <div class="month-input-group">
+      <label>対象月:</label>
+      <input type="month" id="shiftMonth" class="month-input" />
+    </div>
+    <button class="btn btn-shift" id="btnShift" onclick="createShift()">
+      <span class="btn-icon">📋</span>
+      シフト表を作成する
+    </button>
+    <div id="shiftResult" class="result-message"></div>
+    <p class="note">指定した月のシフト表テンプレートを<br>スプレッドシートに作成します</p>
+  </div>
+
+</div>
+
+<div class="footer">
+  <a href="javascript:void(0)" onclick="goToApp()">← 打刻アプリに戻る</a>
+</div>
+
+<script>
+  // =============================================
+  //  初期化
+  // =============================================
+  
+  var GAS_URL = "";
+  var APP_URL = "";
+
+  function init() {
+    // 保存済みのGAS URLを読み込む
+    var savedUrl = localStorage.getItem("kintai_admin_gas_url") || "";
+    GAS_URL = savedUrl;
+    document.getElementById("gasUrl").value = savedUrl;
+    
+    if (savedUrl) {
+      document.getElementById("urlStatus").textContent = "✅ URL設定済み";
+      document.getElementById("urlStatus").className = "url-status saved";
+    }
+    
+    // 打刻アプリのURLを読み込む
+    APP_URL = localStorage.getItem("kintai_admin_app_url") || "";
+    
+    // シフト表の年月を来月にデフォルト設定
+    var now = new Date();
+    var nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    var ym = nextMonth.getFullYear() + "-" + String(nextMonth.getMonth() + 1).padStart(2, "0");
+    document.getElementById("shiftMonth").value = ym;
+  }
+
+  // =============================================
+  //  URL保存
+  // =============================================
+  
+  function saveUrl() {
+    var url = document.getElementById("gasUrl").value.trim();
+    if (!url) {
+      document.getElementById("urlStatus").textContent = "❌ URLを入力してください";
+      document.getElementById("urlStatus").className = "url-status";
+      return;
+    }
+    if (!url.startsWith("https://script.google.com/")) {
+      document.getElementById("urlStatus").textContent = "❌ GASのURLを入力してください";
+      document.getElementById("urlStatus").className = "url-status";
+      return;
+    }
+    GAS_URL = url;
+    localStorage.setItem("kintai_admin_gas_url", url);
+    document.getElementById("urlStatus").textContent = "✅ URLを保存しました";
+    document.getElementById("urlStatus").className = "url-status saved";
+  }
+
+  // =============================================
+  //  チェックシート更新
+  // =============================================
+  
+  function refreshCheck() {
+    if (!GAS_URL) {
+      showResult("refreshResult", "error", "❌ GAS URLが設定されていません");
+      return;
+    }
+    
+    var btn = document.getElementById("btnRefresh");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> 更新中...';
+    showResult("refreshResult", "loading", '<span class="spinner dark"></span> チェックシートを更新しています...');
+    
+    var url = GAS_URL + "?action=refreshCheck";
+    
+    fetch(url, { method: "GET", mode: "cors" })
+      .then(function(response) { return response.json(); })
+      .then(function(data) {
+        if (data.status === "success") {
+          showResult("refreshResult", "success", "✅ " + data.message);
+        } else {
+          showResult("refreshResult", "error", "❌ " + data.message);
+        }
+      })
+      .catch(function(error) {
+        // GASのリダイレクトでCORSエラーが出る場合、no-corsで再試行
+        fetch(url, { method: "GET", mode: "no-cors" })
+          .then(function() {
+            showResult("refreshResult", "success", "✅ チェックシート更新リクエストを送信しました");
+          })
+          .catch(function() {
+            showResult("refreshResult", "error", "❌ 通信エラー: " + error.message);
+          });
+      })
+      .finally(function() {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="btn-icon">🔄</span> 今月のチェックを更新する';
+      });
+  }
+
+  // =============================================
+  //  シフト表作成
+  // =============================================
+  
+  function createShift() {
+    if (!GAS_URL) {
+      showResult("shiftResult", "error", "❌ GAS URLが設定されていません");
+      return;
+    }
+    
+    var ym = document.getElementById("shiftMonth").value;
+    if (!ym) {
+      showResult("shiftResult", "error", "❌ 対象月を選択してください");
+      return;
+    }
+    
+    var btn = document.getElementById("btnShift");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> 作成中...';
+    showResult("shiftResult", "loading", '<span class="spinner dark"></span> シフト表を作成しています...');
+    
+    var url = GAS_URL + "?action=createShift&ym=" + encodeURIComponent(ym);
+    
+    fetch(url, { method: "GET", mode: "cors" })
+      .then(function(response) { return response.json(); })
+      .then(function(data) {
+        if (data.status === "success") {
+          showResult("shiftResult", "success", "✅ " + data.message);
+        } else {
+          showResult("shiftResult", "error", "❌ " + data.message);
+        }
+      })
+      .catch(function(error) {
+        fetch(url, { method: "GET", mode: "no-cors" })
+          .then(function() {
+            showResult("shiftResult", "success", "✅ シフト表作成リクエストを送信しました");
+          })
+          .catch(function() {
+            showResult("shiftResult", "error", "❌ 通信エラー: " + error.message);
+          });
+      })
+      .finally(function() {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="btn-icon">📋</span> シフト表を作成する';
+      });
+  }
+
+  // =============================================
+  //  ヘルパー
+  // =============================================
+  
+  function showResult(elementId, type, message) {
+    var el = document.getElementById(elementId);
+    el.className = "result-message " + type;
+    el.innerHTML = message;
+  }
+
+  function goToApp() {
+    // 同じディレクトリのindex.htmlに遷移
+    var currentUrl = window.location.href;
+    var appUrl = currentUrl.replace(/admin\.html.*$/, "index.html");
+    window.location.href = appUrl;
+  }
+
+  // 初期化実行
+  init();
+</script>
+
+</body>
+</html>
