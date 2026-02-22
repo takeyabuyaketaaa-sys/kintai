@@ -58,6 +58,183 @@
     }
 
     /* ============================================
+       初回セットアップ画面
+       ============================================ */
+    .setup-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--white);
+      z-index: 2000;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 24px;
+      padding-top: calc(var(--safe-top) + 32px);
+      padding-bottom: calc(var(--safe-bottom) + 32px);
+    }
+
+    .setup-screen.show {
+      display: flex;
+    }
+
+    .setup-icon {
+      font-size: 64px;
+      margin-bottom: 16px;
+    }
+
+    .setup-title {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .setup-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      text-align: center;
+      margin-bottom: 36px;
+      line-height: 1.6;
+    }
+
+    .setup-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      align-self: stretch;
+      max-width: 360px;
+      width: 100%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .setup-staff-list {
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 32px;
+      max-height: 50vh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .setup-staff-item {
+      display: flex;
+      align-items: center;
+      padding: 18px 20px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.15s;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .setup-staff-item:active {
+      transform: scale(0.97);
+    }
+
+    .setup-staff-item.selected {
+      background: var(--primary-bg);
+      border-color: var(--primary);
+    }
+
+    .setup-staff-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--primary-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-right: 14px;
+      flex-shrink: 0;
+    }
+
+    .setup-staff-item.selected .setup-staff-avatar {
+      background: var(--primary);
+      color: var(--white);
+    }
+
+    .setup-staff-name {
+      font-size: 17px;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .setup-staff-check {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+
+    .setup-staff-item.selected .setup-staff-check {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .setup-staff-check svg {
+      width: 14px;
+      height: 14px;
+      stroke: white;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .setup-staff-item.selected .setup-staff-check svg {
+      opacity: 1;
+    }
+
+    .setup-confirm-btn {
+      width: 100%;
+      max-width: 360px;
+      padding: 18px;
+      border: none;
+      border-radius: var(--radius);
+      background: var(--primary);
+      color: white;
+      font-size: 17px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .setup-confirm-btn.enabled {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .setup-confirm-btn:active {
+      opacity: 0.8;
+    }
+
+    .setup-change-hint {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 12px;
+      text-align: center;
+    }
+
+    /* ============================================
        タブバー
        ============================================ */
     .tab-bar {
@@ -157,11 +334,70 @@
     }
 
     /* ============================================
+       スタッフ名表示バー
+       ============================================ */
+    .staff-bar {
+      display: flex;
+      align-items: center;
+      background: var(--primary-bg);
+      border: 1px solid rgba(30, 64, 175, 0.15);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      margin-bottom: 16px;
+    }
+
+    .staff-bar-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--white);
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+
+    .staff-bar-info {
+      flex: 1;
+    }
+
+    .staff-bar-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .staff-bar-label {
+      font-size: 11px;
+      color: var(--text-secondary);
+    }
+
+    .staff-bar-change {
+      border: none;
+      background: rgba(30, 64, 175, 0.1);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .staff-bar-change:active {
+      opacity: 0.7;
+    }
+
+    /* ============================================
        時計表示
        ============================================ */
     .clock-section {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .clock-time {
@@ -267,6 +503,47 @@
     input[type="time"] {
       text-align: center;
       font-variant-numeric: tabular-nums;
+    }
+
+    /* ============================================
+       稼働場所選択
+       ============================================ */
+    .location-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .location-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 10px 16px;
+      border: 2px solid var(--border);
+      border-radius: 24px;
+      background: var(--white);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      -webkit-user-select: none;
+      user-select: none;
+      font-family: inherit;
+    }
+
+    .location-chip:active {
+      transform: scale(0.95);
+    }
+
+    .location-chip.selected {
+      background: var(--primary-bg);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .location-chip-icon {
+      margin-right: 6px;
+      font-size: 16px;
     }
 
     /* ============================================
@@ -455,6 +732,7 @@
       color: var(--text-secondary);
       line-height: 1.6;
       margin-bottom: 24px;
+      white-space: pre-line;
     }
 
     .dialog-buttons {
@@ -696,7 +974,7 @@
        インストールバナー
        ============================================ */
     .install-banner {
-      margin: 0 16px 12px;
+      margin: 0 0 12px;
       padding: 14px 16px;
       background: var(--primary-bg);
       border: 1px solid rgba(30, 64, 175, 0.15);
@@ -739,6 +1017,19 @@
 <body>
 
   <!-- ============================================
+       初回セットアップ画面
+       ============================================ -->
+  <div class="setup-screen" id="setupScreen">
+    <div class="setup-icon">👋</div>
+    <div class="setup-title">ようこそ</div>
+    <div class="setup-subtitle">あなたの名前を選択してください。<br>次回以降は自動で設定されます。</div>
+    <div class="setup-label">スタッフ一覧</div>
+    <div class="setup-staff-list" id="setupStaffList"></div>
+    <button class="setup-confirm-btn" id="setupConfirm">この名前で始める</button>
+    <div class="setup-change-hint">あとから設定画面で変更できます</div>
+  </div>
+
+  <!-- ============================================
        ローディングオーバーレイ
        ============================================ -->
   <div class="loading-overlay" id="loadingOverlay">
@@ -774,6 +1065,14 @@
       <div class="settings-title">設定</div>
     </div>
     <div class="settings-body">
+      <div class="settings-section">
+        <div class="settings-section-title">スタッフ設定</div>
+        <div class="settings-input-group">
+          <label>現在のスタッフ</label>
+          <div id="settingsCurrentStaff" style="font-size:16px;font-weight:700;color:var(--primary);margin-bottom:12px;"></div>
+          <button class="settings-save-btn" id="settingsChangeStaff" style="background:var(--primary-bg);color:var(--primary);margin-top:0;">スタッフを変更する</button>
+        </div>
+      </div>
       <div class="settings-section">
         <div class="settings-section-title">GAS連携設定</div>
         <div class="settings-input-group">
@@ -811,24 +1110,26 @@
         </button>
       </div>
 
+      <!-- スタッフ名表示バー -->
+      <div class="staff-bar" id="staffBar">
+        <div class="staff-bar-avatar" id="staffBarAvatar"></div>
+        <div class="staff-bar-info">
+          <div class="staff-bar-label">ログイン中</div>
+          <div class="staff-bar-name" id="staffBarName"></div>
+        </div>
+        <button class="staff-bar-change" id="staffBarChange">変更</button>
+      </div>
+
       <!-- 時計 -->
       <div class="clock-section">
         <div class="clock-time" id="clockTime">--:--:--</div>
         <div class="clock-date" id="clockDate"></div>
       </div>
 
-      <!-- スタッフ名 -->
+      <!-- 稼働場所 -->
       <div class="card">
-        <div class="card-label">スタッフ名</div>
-        <div class="select-wrapper">
-          <select id="staffSelect">
-            <option value="田中 太郎">田中 太郎</option>
-            <option value="佐藤 花子">佐藤 花子</option>
-            <option value="鈴木 一郎">鈴木 一郎</option>
-            <option value="高橋 美咲">高橋 美咲</option>
-            <option value="山田 健太">山田 健太</option>
-          </select>
-        </div>
+        <div class="card-label">📍 稼働場所</div>
+        <div class="location-chips" id="locationChips"></div>
       </div>
 
       <!-- 予定勤務時間 -->
@@ -901,12 +1202,28 @@
     /* ============================================
        定数・設定
        ============================================ */
-    // ★★★ ここにGAS WebアプリのURLを設定してください ★★★
-    // 設定画面からも変更できます
     const DEFAULT_GAS_URL = "";
+
+    // ★★★ スタッフ名の一覧（ここを編集してください）★★★
+    const STAFF_LIST = [
+      "田中 太郎",
+      "佐藤 花子",
+      "鈴木 一郎",
+      "高橋 美咲",
+      "山田 健太",
+    ];
+
+    // ★★★ 稼働場所の一覧（ここを編集してください）★★★
+    const LOCATION_LIST = [
+      "アリオ札幌",
+      "地下歩行空間",
+      "コンコース",
+      "ラソラ札幌",
+    ];
 
     const STORAGE_KEYS = {
       STAFF_NAME: "kintai_staff_name",
+      LOCATION: "kintai_location",
       SCHEDULED_START: "kintai_scheduled_start",
       SCHEDULED_END: "kintai_scheduled_end",
       LAST_CLOCK_IN: "kintai_last_clock_in",
@@ -922,7 +1239,6 @@
     const $ = (id) => document.getElementById(id);
     const clockTime = $("clockTime");
     const clockDate = $("clockDate");
-    const staffSelect = $("staffSelect");
     const scheduledStart = $("scheduledStart");
     const scheduledEnd = $("scheduledEnd");
     const btnClockIn = $("btnClockIn");
@@ -940,12 +1256,22 @@
     const historyDate = $("historyDate");
     const installBanner = $("installBanner");
     const installBannerText = $("installBannerText");
+    const setupScreen = $("setupScreen");
+    const setupStaffList = $("setupStaffList");
+    const setupConfirm = $("setupConfirm");
+    const staffBar = $("staffBar");
+    const staffBarAvatar = $("staffBarAvatar");
+    const staffBarName = $("staffBarName");
+    const locationChips = $("locationChips");
 
     /* ============================================
        状態管理
        ============================================ */
     let isSending = false;
     let dialogResolve = null;
+    let currentStaffName = "";
+    let setupSelectedName = "";
+    let currentLocation = "";
 
     /* ============================================
        ユーティリティ
@@ -969,6 +1295,88 @@
       return localStorage.getItem(STORAGE_KEYS.GAS_URL) || DEFAULT_GAS_URL;
     }
 
+    function getInitial(name) {
+      return name.trim().charAt(0);
+    }
+
+    /* ============================================
+       稼働場所チップの描画
+       ============================================ */
+    function renderLocationChips() {
+      locationChips.innerHTML = LOCATION_LIST.map((loc) => `
+        <button class="location-chip${currentLocation === loc ? " selected" : ""}" data-location="${loc}">
+          <span class="location-chip-icon">📍</span>${loc}
+        </button>
+      `).join("");
+
+      locationChips.querySelectorAll(".location-chip").forEach((chip) => {
+        chip.addEventListener("click", () => {
+          currentLocation = chip.dataset.location;
+          localStorage.setItem(STORAGE_KEYS.LOCATION, currentLocation);
+          renderLocationChips();
+        });
+      });
+    }
+
+    /* ============================================
+       初回セットアップ画面
+       ============================================ */
+    function renderSetupScreen() {
+      setupStaffList.innerHTML = STAFF_LIST.map((name) => `
+        <div class="setup-staff-item" data-name="${name}">
+          <div class="setup-staff-avatar">${getInitial(name)}</div>
+          <div class="setup-staff-name">${name}</div>
+          <div class="setup-staff-check">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </div>
+      `).join("");
+
+      setupStaffList.querySelectorAll(".setup-staff-item").forEach((item) => {
+        item.addEventListener("click", () => {
+          setupStaffList.querySelectorAll(".setup-staff-item").forEach((i) => i.classList.remove("selected"));
+          item.classList.add("selected");
+          setupSelectedName = item.dataset.name;
+          setupConfirm.classList.add("enabled");
+        });
+      });
+    }
+
+    setupConfirm.addEventListener("click", () => {
+      if (!setupSelectedName) return;
+      currentStaffName = setupSelectedName;
+      localStorage.setItem(STORAGE_KEYS.STAFF_NAME, currentStaffName);
+      setupScreen.classList.remove("show");
+      updateStaffBar();
+    });
+
+    function showSetupScreen() {
+      setupSelectedName = "";
+      setupConfirm.classList.remove("enabled");
+      setupStaffList.querySelectorAll(".setup-staff-item").forEach((i) => i.classList.remove("selected"));
+      setupScreen.classList.add("show");
+    }
+
+    /* ============================================
+       スタッフ名表示バー
+       ============================================ */
+    function updateStaffBar() {
+      if (currentStaffName) {
+        staffBarAvatar.textContent = getInitial(currentStaffName);
+        staffBarName.textContent = currentStaffName;
+        $("settingsCurrentStaff").textContent = currentStaffName;
+      }
+    }
+
+    $("staffBarChange").addEventListener("click", () => {
+      showSetupScreen();
+    });
+
+    $("settingsChangeStaff").addEventListener("click", () => {
+      settingsScreen.classList.remove("show");
+      showSetupScreen();
+    });
+
     /* ============================================
        時計の更新
        ============================================ */
@@ -986,7 +1394,14 @@
        ============================================ */
     function loadSettings() {
       const savedStaff = localStorage.getItem(STORAGE_KEYS.STAFF_NAME);
-      if (savedStaff) staffSelect.value = savedStaff;
+      if (savedStaff && STAFF_LIST.includes(savedStaff)) {
+        currentStaffName = savedStaff;
+      }
+
+      const savedLocation = localStorage.getItem(STORAGE_KEYS.LOCATION);
+      if (savedLocation && LOCATION_LIST.includes(savedLocation)) {
+        currentLocation = savedLocation;
+      }
 
       const savedStart = localStorage.getItem(STORAGE_KEYS.SCHEDULED_START);
       if (savedStart) scheduledStart.value = savedStart;
@@ -999,7 +1414,6 @@
     }
 
     function saveSelection() {
-      localStorage.setItem(STORAGE_KEYS.STAFF_NAME, staffSelect.value);
       localStorage.setItem(STORAGE_KEYS.SCHEDULED_START, scheduledStart.value);
       localStorage.setItem(STORAGE_KEYS.SCHEDULED_END, scheduledEnd.value);
     }
@@ -1059,12 +1473,16 @@
     async function handleStamp(type) {
       if (isSending) return;
 
-      // 入力値の保存
       saveSelection();
 
-      const staffName = staffSelect.value;
-      if (!staffName) {
+      if (!currentStaffName) {
         showFeedback("スタッフ名を選択してください", "error");
+        showSetupScreen();
+        return;
+      }
+
+      if (!currentLocation) {
+        showFeedback("稼働場所を選択してください", "error");
         return;
       }
 
@@ -1087,7 +1505,7 @@
       const timeStr = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
       const confirmed = await showDialog(
         `${type}の確認`,
-        `${staffName}さんの${type}を打刻します。\n\n打刻時刻: ${timeStr}\n予定: ${scheduledStart.value} 〜 ${scheduledEnd.value}`,
+        `${currentStaffName}さんの${type}を打刻します。\n\n打刻時刻: ${timeStr}\n稼働場所: ${currentLocation}\n予定: ${scheduledStart.value} 〜 ${scheduledEnd.value}`,
         false
       );
       if (!confirmed) return;
@@ -1100,9 +1518,10 @@
 
       const timestamp = new Date().toISOString();
       const payload = {
-        staffName: staffName,
+        staffName: currentStaffName,
         type: type,
         timestamp: timestamp,
+        location: currentLocation,
         scheduledStart: scheduledStart.value,
         scheduledEnd: scheduledEnd.value,
       };
@@ -1111,7 +1530,6 @@
         const gasUrl = getGasUrl();
 
         if (gasUrl) {
-          // GASへ送信
           const response = await fetch(gasUrl, {
             method: "POST",
             headers: { "Content-Type": "text/plain" },
@@ -1134,8 +1552,8 @@
         localStorage.setItem(lastKey, today);
 
         const msg = gasUrl
-          ? `✅ ${type}を打刻しました`
-          : `✅ ${type}を記録しました（GAS未設定のためローカル保存のみ）`;
+          ? `✅ ${type}を打刻しました（${currentLocation}）`
+          : `✅ ${type}を記録しました（${currentLocation}）\n※GAS未設定のためローカル保存のみ`;
         showFeedback(msg, "success");
 
       } catch (error) {
@@ -1151,8 +1569,6 @@
     btnClockIn.addEventListener("click", () => handleStamp("出勤"));
     btnClockOut.addEventListener("click", () => handleStamp("退勤"));
 
-    // 入力変更時に保存
-    staffSelect.addEventListener("change", saveSelection);
     scheduledStart.addEventListener("change", saveSelection);
     scheduledEnd.addEventListener("change", saveSelection);
 
@@ -1173,7 +1589,6 @@
         return;
       }
 
-      // 新しい順に表示
       const sorted = [...records].reverse();
       historyList.innerHTML = sorted.map((r) => {
         const isClockIn = r.type === "出勤";
@@ -1184,7 +1599,7 @@
             </div>
             <div class="history-info">
               <div class="history-type ${isClockIn ? "clockin" : "clockout"}">${r.type}</div>
-              <div class="history-detail">${r.staffName}｜予定 ${r.scheduledStart} 〜 ${r.scheduledEnd}</div>
+              <div class="history-detail">${r.staffName}｜${r.location || "場所未設定"}｜予定 ${r.scheduledStart} 〜 ${r.scheduledEnd}</div>
             </div>
             <div class="history-time">${formatTime(r.timestamp)}</div>
           </div>
@@ -1217,6 +1632,7 @@
        ============================================ */
     $("openSettings").addEventListener("click", () => {
       gasUrlInput.value = getGasUrl();
+      $("settingsCurrentStaff").textContent = currentStaffName || "未選択";
       settingsScreen.classList.add("show");
     });
 
@@ -1235,11 +1651,8 @@
        インストールバナー
        ============================================ */
     function checkInstallBanner() {
-      // PWAとして起動済みなら非表示
       if (window.matchMedia("(display-mode: standalone)").matches) return;
       if (window.navigator.standalone === true) return;
-
-      // 以前閉じた場合は非表示
       if (localStorage.getItem(STORAGE_KEYS.INSTALL_DISMISSED) === "true") return;
 
       const ua = navigator.userAgent.toLowerCase();
@@ -1260,7 +1673,16 @@
     /* ============================================
        初期化
        ============================================ */
+    renderSetupScreen();
     loadSettings();
+    renderLocationChips();
+
+    if (currentStaffName) {
+      updateStaffBar();
+    } else {
+      showSetupScreen();
+    }
+
     checkInstallBanner();
   </script>
 </body>
