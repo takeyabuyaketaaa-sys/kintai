@@ -506,45 +506,8 @@
     }
 
     /* ============================================
-       稼働場所選択
+       稼働場所選択（プルダウン）
        ============================================ */
-    .location-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .location-chip {
-      display: inline-flex;
-      align-items: center;
-      padding: 10px 16px;
-      border: 2px solid var(--border);
-      border-radius: 24px;
-      background: var(--white);
-      color: var(--text);
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-      -webkit-user-select: none;
-      user-select: none;
-      font-family: inherit;
-    }
-
-    .location-chip:active {
-      transform: scale(0.95);
-    }
-
-    .location-chip.selected {
-      background: var(--primary-bg);
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-
-    .location-chip-icon {
-      margin-right: 6px;
-      font-size: 16px;
-    }
 
     /* ============================================
        打刻ボタン
@@ -1129,7 +1092,9 @@
       <!-- 稼働場所 -->
       <div class="card">
         <div class="card-label">📍 稼働場所</div>
-        <div class="location-chips" id="locationChips"></div>
+        <div class="select-wrapper">
+          <select id="locationSelect"></select>
+        </div>
       </div>
 
       <!-- 予定勤務時間 -->
@@ -1262,7 +1227,7 @@
     const staffBar = $("staffBar");
     const staffBarAvatar = $("staffBarAvatar");
     const staffBarName = $("staffBarName");
-    const locationChips = $("locationChips");
+    const locationSelect = $("locationSelect");
 
     /* ============================================
        状態管理
@@ -1300,23 +1265,17 @@
     }
 
     /* ============================================
-       稼働場所チップの描画
+       稼働場所プルダウンの描画
        ============================================ */
-    function renderLocationChips() {
-      locationChips.innerHTML = LOCATION_LIST.map((loc) => `
-        <button class="location-chip${currentLocation === loc ? " selected" : ""}" data-location="${loc}">
-          <span class="location-chip-icon">📍</span>${loc}
-        </button>
-      `).join("");
-
-      locationChips.querySelectorAll(".location-chip").forEach((chip) => {
-        chip.addEventListener("click", () => {
-          currentLocation = chip.dataset.location;
-          localStorage.setItem(STORAGE_KEYS.LOCATION, currentLocation);
-          renderLocationChips();
-        });
-      });
+    function renderLocationSelect() {
+      locationSelect.innerHTML = '<option value="">-- 選択してください --</option>' +
+        LOCATION_LIST.map((loc) => `<option value="${loc}"${currentLocation === loc ? " selected" : ""}>${loc}</option>`).join("");
     }
+
+    locationSelect.addEventListener("change", () => {
+      currentLocation = locationSelect.value;
+      localStorage.setItem(STORAGE_KEYS.LOCATION, currentLocation);
+    });
 
     /* ============================================
        初回セットアップ画面
@@ -1675,7 +1634,7 @@
        ============================================ */
     renderSetupScreen();
     loadSettings();
-    renderLocationChips();
+    renderLocationSelect();
 
     if (currentStaffName) {
       updateStaffBar();
